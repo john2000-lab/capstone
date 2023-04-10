@@ -37,12 +37,12 @@
         }
 
         // Retrieve the device_id from the rain_data table
-        $sql = "SELECT device_id FROM rain_data LIMIT 1";
+        $sql = "SELECT location FROM pressure_data LIMIT 1";
         $result = mysqli_query($conn, $sql);
 
         if (mysqli_num_rows($result) > 0) {
           $row = mysqli_fetch_assoc($result);
-          $device_id = $row["device_id"];
+          $device_id = $row["location"];
         } else {
           $device_id = "Unknown Device";
         }
@@ -51,7 +51,7 @@
         mysqli_close($conn);
 
         // Display the modal header with the device_id
-        echo '<h5 class="modal-title" id="exampleModalLabel">' . $device_id . ' Weather Report</h5>';
+        echo '<h5 class="modal-title" id="exampleModalLabel">' . $device_id . ' -  Current Weather Report</h5>';
         ?>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -78,7 +78,7 @@
             }
 
           // Retrieve the weather data from the three tables using JOIN statements
-            $sql = "SELECT rain_data.rainStatus, temperature_data.temperatureStatus, humidity_data.humidityStatus FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id LIMIT 1";
+            $sql = "SELECT rain_data.rainStatus, temperature_data.temperatureStatus, humidity_data.humidityStatus, pressure_data.pressure, wind_speed_data.wind_speed FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id JOIN pressure_data ON rain_data.id = pressure_data.id JOIN wind_speed_data ON rain_data.id = wind_speed_data.id LIMIT 1";
             $result = mysqli_query($conn, $sql);
 
 
@@ -88,6 +88,8 @@
               echo '<td>' . $row["rainStatus"] . '</td>';
               echo '<td>' . $row["temperatureStatus"] . '</td>';
               echo '<td>' . $row["humidityStatus"] . '</td>';
+              echo '<td>' . $row["pressure"] . '</td>';
+              echo '<td>' . $row["wind_speed"] . '</td>';
               echo '</tr>';
             } else {
               echo '<tr><td colspan="4">No data found</td></tr>';
@@ -123,17 +125,18 @@
   </div>
 </div>
         <div class="col-md-8">
-        <table id="example" class="table table-bordered table-hover">
+        <table id="example" class="table table-bordered table-hover" style="font-size: 14px;">
     <thead class="thead-dark">
         <tr>
-            <th>Device ID</th>
+            <th>Device</th>
             <th>Latitude</th>
             <th>Longitude</th>
             <th>Rain</th>
             <th>Temperature</th>
             <th>Humidity</th>
             <th>Pressure</th>
-            <th>Timestamp</th>
+            <th>Wind Speed</th>
+            <th>Date/Time</th>
         </tr>
     </thead>
     <tbody>
@@ -151,7 +154,7 @@ if (!$conn) {
 }
 
 // Retrieve the latest 20 records from the rain_data table
-$sql = "SELECT rain_data.Id, rain_data.device_id, rain_data.latitude, rain_data.longitude, rain_data.rainValue, rain_data.rainStatus, temperature_data.temperatureStatus, humidity_data.humidityStatus, pressure_data.pressure, rain_data.timestamp FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id JOIN pressure_data ON rain_data.id = pressure_data.id ORDER BY rain_data.timestamp";
+$sql = "SELECT rain_data.Id, rain_data.device_id, rain_data.latitude, rain_data.longitude, rain_data.rainfallIntensity, rain_data.rainStatus, temperature_data.temperatureStatus, humidity_data.humidityStatus, pressure_data.pressure, wind_speed_data.wind_speed, rain_data.timestamp FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id JOIN pressure_data ON rain_data.id = pressure_data.id JOIN wind_speed_data ON rain_data.id = wind_speed_data.id ORDER BY rain_data.timestamp";
 $result = mysqli_query($conn, $sql);
 
 // Create the datatable rows
@@ -164,6 +167,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     echo "<td>".$row['temperatureStatus']."</td>";
     echo "<td>".$row['humidityStatus']."</td>";
     echo "<td>".$row['pressure']."</td>";
+    echo "<td>".$row['wind_speed']."km/h"."</td>";
     echo "<td>".$row['timestamp']."</td>";
     echo "</tr>";
 }
@@ -204,7 +208,7 @@ mysqli_close($conn);
                 }
 
                 // Query the rain_data table to retrieve the rainValue and timestamp data
-                $sql = "SELECT rainValue, timestamp FROM rain_data ORDER BY timestamp DESC LIMIT 20";
+                $sql = "SELECT rainfallIntensity, timestamp FROM rain_data ORDER BY timestamp DESC LIMIT 20";
                 $result = $conn->query($sql);
                 
                 // Initialize empty arrays for rainValue and timestamp data
@@ -213,7 +217,7 @@ mysqli_close($conn);
                 
                 // Store the retrieved data in the arrays
                 while($row = $result->fetch_assoc()) {
-                  array_unshift($rainValues, $row["rainValue"]);
+                  array_unshift($rainValues, $row["rainfallIntensity"]);
                   array_unshift($timestamps, $row["timestamp"]);
                 }
 
@@ -246,7 +250,7 @@ mysqli_close($conn);
             }
 
             // Retrieve data from the temperature_data table
-            $sql = "SELECT temperatureValue, timestamp FROM temperature_data ORDER BY timestamp DESC LIMIT 20";
+            $sql = "SELECT temperatureValue, timestamp FROM temperature_data ORDER BY timestamp DESC LIMIT 5";
             $result = mysqli_query($conn, $sql);
 
             // Create arrays to store the temperature values and timestamps
@@ -290,7 +294,7 @@ mysqli_close($conn);
             }
 
             // Retrieve data from the temperature_data table
-            $sql = "SELECT humidityValue, timestamp FROM humidity_data ORDER BY timestamp DESC LIMIT 20";
+            $sql = "SELECT humidityValue, timestamp FROM humidity_data ORDER BY timestamp DESC LIMIT 10";
             $result = mysqli_query($conn, $sql);
 
             // Create arrays to store the temperature values and timestamps
@@ -348,3 +352,42 @@ mysqli_close($conn);
           ?>
         </div>
 </div>
+</div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-6">
+          <canvas id="windSpeedChart"></canvas>
+          <?php
+            // Connect to the database
+            $db_host = "localhost";
+            $db_user = "root";
+            $db_pass = "";
+            $db_name = "weather_data";
+
+            $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+
+            if (!$conn) {
+                die("Connection failed: " . mysqli_connect_error());
+            }
+
+            // Retrieve data from the temperature_data table
+            $sql = "SELECT wind_speed, timestamp FROM wind_speed_data ORDER BY timestamp DESC LIMIT 20";
+            $result = mysqli_query($conn, $sql);
+
+            // Create arrays to store the temperature values and timestamps
+            $windSpeedValues = array();
+            $timestamps = array();
+
+            // Populate the arrays with data from the database
+            while ($row = mysqli_fetch_assoc($result)) {
+                $windSpeedValues[] = $row['wind_speed'];
+                $timestamps[] = $row['timestamp'];
+            }
+
+            // Close the database connection
+            mysqli_close($conn);
+            ?>
+      </div>
+  </div>
+</div>
+

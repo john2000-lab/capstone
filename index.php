@@ -52,27 +52,37 @@
       ]
     });
 
+    // add custom filtering function to filter based on "Rain" column value
+    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+      var searchValue = $('#example_filter input').val().toLowerCase();
+      var rainValue = data[3].toLowerCase();
+      if (searchValue === "raining" && rainValue !== "raining") {
+        return false; // exclude rows where "Rain" column is not "Raining" when searching for "Raining"
+      }
+      return true;
+    });
+
     // listen for search input changes
-    $('#example_filter input').on('keydown', function(e) {
+    $('#example_filter input').on('keyup', function(e) {
       if (e.keyCode === 13) { // check if Enter key was pressed
-        var searchValue = $(this).val().toLowerCase();
-
         // filter the table based on the search value
-        table.search(searchValue).draw();
-
-        // get the search results and display them in the modal
-        var results = table.rows({search: 'applied'}).data();
-        searchResultsTable.clear(); // clear any previous results
-
-        // add the search results to the search results table
-        if (results.length > 0) {
-          searchResultsTable.rows.add(results).draw();
-        } else {
-          searchResultsTable.row.add(['No results found.', '', '', '', '', '', '', '']).draw();
-        }
+        table.draw();
 
         // show the modal with the search results
         $('#myModal').modal('show');
+      }
+    });
+
+    // get the search results and display them in the modal
+    $('#myModal').on('show.bs.modal', function() {
+      var results = table.rows({search: 'applied'}).data();
+      searchResultsTable.clear(); // clear any previous results
+
+      // add the search results to the search results table
+      if (results.length > 0) {
+        searchResultsTable.rows.add(results).draw();
+      } else {
+        searchResultsTable.row.add(['No results found.', '', '', '', '', '', '', '']).draw();
       }
     });
   });
@@ -286,6 +296,7 @@ form input[type="submit"]:hover {
   margin-left: 10px;
 }
 
+
   </style>
 </head>
 <body onload="initMap()">
@@ -452,9 +463,9 @@ var rainValueChart = new Chart(ctx, {
           var values = dataset.data;
           var colors = dataset.pointBackgroundColor;
           var valueLabels = [
-            { text: 'Not Raining', min: 800, max: 1024 },
+            { text: 'Not Raining', min: 0, max: 299 },
             { text: 'Light Rain', min: 300, max: 799 },
-            { text: 'Heavy Rain', min: 0, max: 299 }
+            { text: 'Heavy Rain', min: 800, max: 2040 }
           ];
           valueLabels.forEach(function(label) {
             labels.push({
@@ -709,5 +720,89 @@ var pressureChart = new Chart(ctx, {
 });
 </script>
 
+<!-- Initialize the chart with the retrieved data and options -->
+<script>
+var ctx = document.getElementById('windSpeedChart').getContext('2d');
+var windSpeedChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: <?php echo json_encode($timestamps); ?>,
+    datasets: [{
+      label: 'Wind Speed',
+      data: <?php echo json_encode($windSpeedValues); ?>,
+      borderColor: function(context) {
+        var value = context.dataset.data[context.dataIndex];
+        if (value >= 20) {
+          return 'red';
+        } else if (value >= 10 && value < 20) {
+          return 'yellow';
+        } else {
+          return 'green';
+        }
+      },
+      backgroundColor: function(context) {
+        var value = context.dataset.data[context.dataIndex];
+        if (value >= 20) {
+          return 'rgba(255, 99, 132, 0.2)';
+        } else if (value >= 10 && value < 20) {
+          return 'rgba(255, 206, 86, 0.2)';
+        } else {
+          return 'rgba(75, 192, 192, 0.2)';
+        }
+      },
+      borderWidth: 1
+    }]
+  },
+  options: {
+    scales: {
+      xAxes: [{
+        type: 'time',
+        time: {
+          unit: 'hour',
+          displayFormats: {
+            hour: 'MMM D hA'
+          }
+        },
+        distribution: 'linear'
+      }],
+      yAxes: [{
+        ticks: {
+          beginAtZero: true
+        }
+      }]
+    },
+    legend: {
+      display: true,
+      labels: {
+        fontColor: 'black',
+        fontSize: 16,
+        usePointStyle: true,
+        generateLabels: function(chart) {
+          var labels = [];
+          var data = chart.data;
+          var datasets = data.datasets;
+          var dataset = datasets[0];
+          var values = dataset.data;
+          var colors = dataset.borderColor;
+          var valueLabels = [
+            { text: 'Low', min: 0, max: 10 },
+            { text: 'Moderate', min: 10, max: 20 },
+            { text: 'High', min: 20, max: 2000 }
+          ];
+          valueLabels.forEach(function(label, index) {
+            labels.push({
+              text: label.text,
+              fillStyle: colors[index],
+              strokeStyle: colors[index],
+              pointStyle: 'circle'
+            });
+          });
+          return labels;
+        }
+      }
+    }
+  }
+});
+</script>
 </body>
 </html>
