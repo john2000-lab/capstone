@@ -141,25 +141,6 @@
   border-bottom: 2px solid #333;
 }
 
-.dropdown-menu {
-  padding: 0;
-  border-radius: 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,.1);
-}
-
-.dropdown-item {
-  font-size: 14px;
-  font-weight: 400;
-  color: #555;
-  padding: 8px 16px;
-  transition: all 0.2s ease-in-out;
-}
-
-.dropdown-item:hover {
-  color: #333;
-  background-color: #f5f5f5;
-}
-
       #map {
         width: 100%;
         height:100%;
@@ -214,10 +195,17 @@
   }
   
   h2 {
-    color: #fff;
+    color: #333;
     font-size: 25px;
     font-weight: bold;
     margin: 0;
+    margin-bottom:10px
+  }
+  .team{
+    margin-bottom:20px;
+    text-align:center;
+    font-size:50px;
+    margin-top:30px;
   }
   
 </style>
@@ -243,10 +231,9 @@
         background-color: #fff;
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        padding-top:50px;
+        padding-top:20px;
         padding-bottom:50px;
-        margin-top:40px;
-        margin-bottom:100px;
+        margin-bottom:50px;
       }
 
       .card-title {
@@ -257,6 +244,7 @@
       .card-text {
         font-size: 0.9rem;
         line-height: 1.4;
+        text-align: justify;
       }
       .container {
   margin-top: 50px;
@@ -295,8 +283,67 @@ form input[type="submit"]:hover {
 #rainLegend .legend-text {
   margin-left: 10px;
 }
+.card {
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  padding-top:40px;
+  padding-bottom:90px;
+}
 
+.container {
+  padding: 20px;
+}
 
+.content {
+  display: flex;
+}
+
+.left-side, .right-side {
+  flex: 1;
+  padding: 10px;
+}
+
+.left-side {
+  border-right: 1px solid #ccc;
+}
+
+.right-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.details {
+  margin-bottom: 20px;
+}
+
+.topic {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.text-one, .text-two {
+  font-size: 16px;
+  margin-bottom: 3px;
+}
+
+.topic-text {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.carousel-inner img {
+        width: 100%;
+        height: 40%;
+      }
+      .carousel-caption {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        border-radius: 10px;
+      }
   </style>
 </head>
 <body onload="initMap()">
@@ -318,18 +365,8 @@ form input[type="submit"]:hover {
 				<li class="nav-item<?php if($page == 'contact') echo ' active'; ?>">
 					<a class="nav-link" href="?page=contact">Contact</a>
 				</li>
-				<li class="nav-item dropdown dropup<?php if($page == 'weather') echo ' active'; ?>">
-					<a class="nav-link dropdown-toggle" href="#" id="weatherDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Weather Sensors</a>
-					<div class="dropdown-menu" aria-labelledby="weatherDropdown">
-						<a class="dropdown-item" href="?page=weather1">Weather Sensor 1</a>
-						<a class="dropdown-item" href="?page=weather2">Weather Sensor 2</a>
-						<a class="dropdown-item" href="?page=weather3">Weather Sensor 3</a>
-						<a class="dropdown-item" href="?page=weather4">Weather Sensor 4</a>
-						<a class="dropdown-item" href="?page=weather5">Weather Sensor 5</a>
-					</div>
-				</li>
-				<li class="nav-item<?php if($page == 'info') echo ' active'; ?>">
-					<a class="nav-link" href="?page=info">More Information</a>
+				<li class="nav-item <?php if($page == 'weather') echo ' active'; ?>">
+					<a class="nav-link" href="?page=weather">Weather Sensors</a>
 				</li>
 			</ul>
 		</div>
@@ -344,8 +381,8 @@ form input[type="submit"]:hover {
 					include 'aboutus.php';
 				} else if($page == 'contact') {
 					include 'contact.php';
-				} else if($page == 'info') {
-					include 'info.php';
+        } else if($page == 'weather') {
+					include 'weather.php';
 				} else {
 					include 'home.php';
 				}

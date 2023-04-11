@@ -1,6 +1,6 @@
-<div style="background-image: url('img/background.jpg'); height: 380px; background-position: bottom; display: grid; grid-template-columns: repeat(3, 1fr);">
+<div style="background-image: url('img/background.jpg'); height: 500px; background-position: center; display: grid; grid-template-columns: repeat(3, 1fr); background-repeat: no-repeat; background-size: cover;">
   <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; padding-left: 50px; grid-column: 1 / 2;">
-    <h2 style="font-size: 39px; color: #fff; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Stay ahead of the weather, with our Micro Weather Station -</h2>
+    <h2 style="font-size: 45px; color: #fff; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Stay ahead of the weather, with our Micro Weather Station -</h2>
     <h6 style="color: #fff;">Your local source for accurate and reliable weather information in Bukidnon.</h6>
   </div>
 </div>
@@ -17,7 +17,7 @@
         </div>
         <div class="row">
         <div class="col-md-4">
-          <div id="map" style="height:825px"></div>
+          <div id="map" style="height:760px"></div>
           <!-- Modal for table display -->
           <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -78,7 +78,7 @@
             }
 
           // Retrieve the weather data from the three tables using JOIN statements
-            $sql = "SELECT rain_data.rainStatus, temperature_data.temperatureStatus, humidity_data.humidityStatus, pressure_data.pressure, wind_speed_data.wind_speed FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id JOIN pressure_data ON rain_data.id = pressure_data.id JOIN wind_speed_data ON rain_data.id = wind_speed_data.id LIMIT 1";
+            $sql = "SELECT rain_data.rainStatus, rain_data.timestamp, temperature_data.temperatureStatus, humidity_data.humidityStatus, pressure_data.pressure, wind_speed_data.wind_speed FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id JOIN pressure_data ON rain_data.id = pressure_data.id JOIN wind_speed_data ON rain_data.id = wind_speed_data.id ORDER BY rain_data.timestamp DESC LIMIT 1";
             $result = mysqli_query($conn, $sql);
 
 
@@ -89,7 +89,7 @@
               echo '<td>' . $row["temperatureStatus"] . '</td>';
               echo '<td>' . $row["humidityStatus"] . '</td>';
               echo '<td>' . $row["pressure"] . '</td>';
-              echo '<td>' . $row["wind_speed"] . '</td>';
+              echo '<td>' . $row["wind_speed"]."km/h". '</td>';
               echo '</tr>';
             } else {
               echo '<tr><td colspan="4">No data found</td></tr>';
@@ -154,7 +154,7 @@ if (!$conn) {
 }
 
 // Retrieve the latest 20 records from the rain_data table
-$sql = "SELECT rain_data.Id, rain_data.device_id, rain_data.latitude, rain_data.longitude, rain_data.rainfallIntensity, rain_data.rainStatus, temperature_data.temperatureStatus, humidity_data.humidityStatus, pressure_data.pressure, wind_speed_data.wind_speed, rain_data.timestamp FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id JOIN pressure_data ON rain_data.id = pressure_data.id JOIN wind_speed_data ON rain_data.id = wind_speed_data.id ORDER BY rain_data.timestamp";
+$sql = "SELECT rain_data.Id, rain_data.device_id, rain_data.latitude, rain_data.longitude, rain_data.rainfallIntensity, rain_data.rainStatus, temperature_data.temperatureStatus, humidity_data.humidityStatus, pressure_data.pressure, wind_speed_data.wind_speed, rain_data.timestamp FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id JOIN pressure_data ON rain_data.id = pressure_data.id JOIN wind_speed_data ON rain_data.id = wind_speed_data.id ORDER BY rain_data.timestamp DESC";
 $result = mysqli_query($conn, $sql);
 
 // Create the datatable rows
@@ -250,7 +250,7 @@ mysqli_close($conn);
             }
 
             // Retrieve data from the temperature_data table
-            $sql = "SELECT temperatureValue, timestamp FROM temperature_data ORDER BY timestamp DESC LIMIT 5";
+            $sql = "SELECT temperatureValue, timestamp FROM temperature_data ORDER BY timestamp DESC LIMIT 20";
             $result = mysqli_query($conn, $sql);
 
             // Create arrays to store the temperature values and timestamps
@@ -280,7 +280,7 @@ mysqli_close($conn);
             <span class="legend-text">High</span>
             </div>
           <canvas id="humidityChart"></canvas>
-        <?php
+          <?php
             // Connect to the database
             $db_host = "localhost";
             $db_user = "root";
@@ -294,7 +294,7 @@ mysqli_close($conn);
             }
 
             // Retrieve data from the temperature_data table
-            $sql = "SELECT humidityValue, timestamp FROM humidity_data ORDER BY timestamp DESC LIMIT 10";
+            $sql = "SELECT humidityValue, timestamp FROM humidity_data ORDER BY timestamp DESC LIMIT 20";
             $result = mysqli_query($conn, $sql);
 
             // Create arrays to store the temperature values and timestamps
@@ -351,11 +351,19 @@ mysqli_close($conn);
           $conn->close();
           ?>
         </div>
-</div>
+  </div>
 </div>
 <div class="container-fluid">
   <div class="row">
     <div class="col-6">
+    <div id="rainLegend">
+            <span class="box" style="background-color: blue;"></span>
+            <span class="legend-text">Cool</span>
+            <span class="box" style="background-color: orange;"></span>
+            <span class="legend-text">Warm</span>
+            <span class="box" style="background-color: red;"></span>
+            <span class="legend-text">Hot</span>
+            </div>
           <canvas id="windSpeedChart"></canvas>
           <?php
             // Connect to the database
