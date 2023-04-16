@@ -22,7 +22,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.32/moment-timezone-with-data.min.js"></script>
   <!-- Style for the clock -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
+
   <script>
   $(document).ready(function() {
     var table = $('#example').DataTable({
@@ -344,6 +344,16 @@ form input[type="submit"]:hover {
         padding: 10px;
         border-radius: 10px;
       }
+      .radio-container {
+  display: flex;
+  justify-content: center;
+  padding-left: 30px;
+}
+
+.radio-container input[type="radio"] {
+  margin: 0 10px;
+}
+
   </style>
 </head>
 <body onload="initMap()">
@@ -443,6 +453,7 @@ form input[type="submit"]:hover {
     </div>
   </div>
 </footer>
+
 <script>
 // Initialize the chart with the retrieved data and options
 var ctx = document.getElementById('rainValueChart').getContext('2d');
@@ -841,5 +852,19 @@ var windSpeedChart = new Chart(ctx, {
   }
 });
 </script>
+<script>
+  function showChart(chartId) {
+  var charts = ['rainValueChart', 'temperatureValueChart', 'humidityChart', 'pressureChart', 'windSpeedChart'];
+  
+  // hide all charts
+  for (var i = 0; i < charts.length; i++) {
+    document.getElementById(charts[i]).style.display = 'none';
+  }
+  
+  // show selected chart
+  document.getElementById(chartId).style.display = 'block';
+}
+
+  </script>
 </body>
 </html>

@@ -57,11 +57,10 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <table class="table">
+      <div class="modal-body" style="width:100%;">
+        <table class="table mt-3">
           <thead>
             <tr>
-              <th>Rain</th>
               <th>Temperature</th>
               <th>Humidity</th>
               <th>Pressure</th>
@@ -69,6 +68,7 @@
             </tr>
           </thead>
           <tbody>
+            
             <?php
             // Establish a database connection
             $conn = mysqli_connect($servername, $username, $password, $dbname);
@@ -81,11 +81,9 @@
             $sql = "SELECT rain_data.rainStatus, rain_data.timestamp, temperature_data.temperatureStatus, humidity_data.humidityStatus, pressure_data.pressure, wind_speed_data.wind_speed FROM rain_data JOIN temperature_data ON rain_data.id = temperature_data.id JOIN humidity_data ON rain_data.id = humidity_data.id JOIN pressure_data ON rain_data.id = pressure_data.id JOIN wind_speed_data ON rain_data.id = wind_speed_data.id ORDER BY rain_data.timestamp DESC LIMIT 1";
             $result = mysqli_query($conn, $sql);
 
-
             if (mysqli_num_rows($result) > 0) {
               $row = mysqli_fetch_assoc($result);
               echo '<tr>';
-              echo '<td>' . $row["rainStatus"] . '</td>';
               echo '<td>' . $row["temperatureStatus"] . '</td>';
               echo '<td>' . $row["humidityStatus"] . '</td>';
               echo '<td>' . $row["pressure"] . '</td>';
@@ -100,20 +98,31 @@
             ?>
           </tbody>
         </table>
+        <div class="radio-container">
+          <input type="radio" name="chart" value="rainValueChart" onclick="showChart(this.value)">Rain
+          <input type="radio" name="chart" value="temperatureValueChart" onclick="showChart(this.value)">Temperature
+          <input type="radio" name="chart" value="humidityChart" onclick="showChart(this.value)">Humidity
+          <input type="radio" name="chart" value="pressureChart" onclick="showChart(this.value)">Pressure
+          <input type="radio" name="chart" value="windSpeedChart" onclick="showChart(this.value)">Wind
+        </div>
+          <canvas id="rainValueChart"></canvas>
+          <canvas id="temperatureValueChart"></canvas>
+          <canvas id="humidityChart"></canvas>
+          <canvas id="pressureChart"></canvas>
+          <canvas id="windSpeedChart"></canvas>
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
-    </div>
-  </div>
-</div>
-
-
-        </div>
+      </div>
+          </div>
+          </div>
+          </div>
 <!-- HTML code for the modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog custom-modal-dialog" role="document">
-    <div class="modal-content">
+    <div class="modal-content" style="width:160%">
       <div class="modal-header">
         <h4 class="modal-title" id="myModalLabel">Search Results</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -184,7 +193,7 @@ mysqli_close($conn);
         </div>
     </div>
   </div>
-  <div class="container-fluid">
+ <!-- <div class="container-fluid">
   <div class="row">
         <div class="col-sm-6">
             <div id="rainLegend">
@@ -397,5 +406,5 @@ mysqli_close($conn);
             ?>
       </div>
   </div>
-</div>
+</div>-->
 
